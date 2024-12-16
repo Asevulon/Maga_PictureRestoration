@@ -9,12 +9,8 @@ private:
 	std::vector<std::vector<double>> Convolution;
 	vector<double> H;
 
-	double A = 0;
-	double x0 = 0;
-	double y0 = 0;
-	double Sx = 0;
-	double Sy = 0;
-
+	double S = 0;
+	int N = 0;
 
 protected:
 	void GenerateH(std::vector<double>& target);
@@ -25,6 +21,6 @@ public:
 	std::vector<std::vector<double>>GetConvolution();
 	std::vector<std::vector<double>>GetH();
 	void Blur();
-	void SetGauss(double pa, double px0, double py0, double psx, double psy);
+	void SetGauss(int n, double s);
 };
 

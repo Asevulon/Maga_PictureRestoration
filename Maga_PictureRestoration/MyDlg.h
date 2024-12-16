@@ -39,9 +39,12 @@ public:
 	afx_msg void OnBnClickedButtonSource();
 	Drawer CorruptedPicture;
 	Drawer RestoredPicture;
-	double A;
-	double x0;
-	double y0;
-	double Sx;
-	double Sy;
+	int N;
+	double S;
+	MainJob mj;
+
+	afx_msg void OnBnClickedButtonSwapQuadrants();
+	double ErrBefore;
+	double ErrorAfter;
+	double ErrorAfterSwap;
 };

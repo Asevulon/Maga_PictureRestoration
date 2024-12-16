@@ -7,13 +7,24 @@ using namespace std;
 void ImageBlurer::GenerateH(std::vector<double>& target)
 {
 	//S = Sx
-	int Hsize = 6 * Sx;
+	int Hsize = N;
 	if ((Hsize % 2) == 0)Hsize++;
 	int mid = Hsize / 2;
 	target.resize(Hsize);
 	for (int i = 0; i < Hsize; i++)
 	{
-		target[i] = exp(-pow2(i - mid) / 2. / Sx / Sx) / sqrt(Pi2 * Sx * Sx);
+		target[i] = exp(-pow2(i - mid) / 2. / S / S) / sqrt(Pi2 * S * S);
+	}
+
+	double summ = 0;
+	for (int i = 0; i < Hsize; i++)
+	{
+		summ += target[i];
+	}
+
+	for (int i = 0; i < Hsize; i++)
+	{
+		target[i] /= summ;
 	}
 }
 
@@ -83,13 +94,24 @@ vector<vector<double>> ImageBlurer::GetH()
 	double xmid = res[0].size() / 2.;
 	double ymid = res.size() / 2.;
 
+	double summ = 0;
 	for (int i = 0; i < res.size(); i++)
 	{
 		for (int j = 0; j < res[i].size(); j++)
 		{
-			res[i][j] = exp(-(pow2(j - xmid) + pow2(i - ymid)) / 2. / Sx / Sx) / Pi2 / Sx / Sx;
+			res[i][j] = exp(-(pow2(j - xmid) + pow2(i - ymid)) / 2. / S / S) / Pi2 / S / S;
+			summ += res[i][j];
 		}
 	}
+
+	for (int i = 0; i < res.size(); i++)
+	{
+		for (int j = 0; j < res[i].size(); j++)
+		{
+			res[i][j] /= summ;
+		}
+	}
+
 	return res;
 }
 
@@ -101,11 +123,8 @@ void ImageBlurer::Blur()
 	Convolute(Convolution, data, H);
 }
 
-void ImageBlurer::SetGauss(double pa, double px0, double py0, double psx, double psy)
+void ImageBlurer::SetGauss(int n, double s)
 {
-	A = pa;
-	x0 = px0;
-	y0 = py0;
-	Sx = psx;
-	Sy = psy;
+	N = n;
+	S = s;
 }

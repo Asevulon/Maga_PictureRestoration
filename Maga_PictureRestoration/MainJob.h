@@ -19,14 +19,12 @@ private:
 	std::vector<std::vector<double>> RestoredData;
 	std::vector<std::vector<double>> H;
 	std::pair<int, int> OriginalSourceSize;
-	double EstimateSourceNoise = 0;
+	double EstimateSourceBlur = 0;
 	double EstimateSourcePurified = 0;
+	double EstimateSourcePurifiedSwap = 0;
 
-	double A = 0;
-	double x0 = 0;
-	double y0 = 0;
-	double Sx = 0;
-	double Sy = 0;
+	int N = 0;
+	double S = 0;
 protected:
 	void LoadPicture();
 	void LoadGauss();
@@ -39,6 +37,7 @@ protected:
 	void Estimate();
 
 	void BlurData();
+	void RestoreData();
 public:
 	void SetPath(CString& path, bool ispicture);
 	void main();
@@ -48,8 +47,10 @@ public:
 	std::vector<std::vector<double>> GetRestoredData();
 	std::vector<std::vector<double>> GetBluredData();
 	std::vector<std::vector<double>> GetH();
-	void SetGauss(double pa, double px0, double py0, double psx, double psy);
+	void SetGauss(int n, double s);
 	double GetMistake();
 	double GetDifferance();
+	double GetDifferanceSwap();
+	void SwapQuadrants();
 };
 

@@ -102,26 +102,47 @@ void MainJob::Estimate()
 		for (int j = 0; j < StretchedData[i].size(); j++)
 		{
 			Emist = pow2(StretchedData[i][j] - RestoredData[i][j]);
-			Enoise = pow2(StretchedData[i][j] - data[i][j]);
+			Enoise = pow2(StretchedData[i][j] - BluredData[i][j]);
 		}
 	}
 
 	Emist /= Epure;
 	Enoise /= Epure;
 
-	EstimateSourceNoise = sqrt(Enoise);
+
+	EstimateSourceBlur = sqrt(Enoise);
 	EstimateSourcePurified = sqrt(Emist);
+
+	SwapQuadrants();
+
+	Emist = 0;
+	for (int i = 0; i < StretchedData.size(); i++)
+	{
+		for (int j = 0; j < StretchedData[i].size(); j++)
+		{
+			Emist = pow2(StretchedData[i][j] - RestoredData[i][j]);
+		}
+	}
+
+	Emist /= Epure;
+
+	EstimateSourcePurifiedSwap = sqrt(Emist);
+
+	SwapQuadrants();
 }
 
 void MainJob::BlurData()
 {
 	ImageBlurer ib;
 	ib.SetData(StretchedData);
-	ib.SetGauss(A, x0, y0, Sx, Sy);
+	ib.SetGauss(N, S);
 	ib.Blur();
 	BluredData = ib.GetConvolution();
 	H = ib.GetH();
+}
 
+void MainJob::RestoreData()
+{
 	Restorer rest;
 	rest.SetData(BluredData);
 	rest.SetH(H);
@@ -151,8 +172,10 @@ void MainJob::main()
 	StretchImage();
 	StretchedData = data;
 	BlurData();
+	RestoreData();
+	
 
-	//Estimate();
+	Estimate();
 	//RestoreRange();
 }
 
@@ -186,22 +209,50 @@ std::vector<std::vector<double>> MainJob::GetH()
 	return H;
 }
 
-void MainJob::SetGauss(double pa, double px0, double py0, double psx, double psy)
+void MainJob::SetGauss(int n, double s)
 {
-	A = pa;
-	x0 = px0;
-	y0 = py0;
-	Sx = psx;
-	Sy = psy;
+	N = n;
+	S = s;
 }
 
 
 double MainJob::GetMistake()
 {
-	return EstimateSourcePurified;
+	return EstimateSourceBlur;
 }
 
 double MainJob::GetDifferance()
 {
-	return EstimateSourceNoise;
+	return EstimateSourcePurified;
+}
+
+double MainJob::GetDifferanceSwap()
+{
+	return EstimateSourcePurifiedSwap;
+}
+
+void MainJob::SwapQuadrants()
+{
+	if (RestoredData.empty())return;
+
+	int xsize = RestoredData[0].size();
+	int ysize = RestoredData.size();
+	int xh = xsize / 2;
+	int yh = ysize / 2;
+	double temp = 0;
+
+	for (int i = 0; i < yh; i++)
+	{
+		for (int j = 0; j < xh; j++)
+		{
+			temp = RestoredData[i][j];
+			RestoredData[i][j] = RestoredData[i + yh][j + xh];
+			RestoredData[i + yh][j + xh] = temp;
+
+			temp = RestoredData[i][j + xh];
+			RestoredData[i][j + xh] = RestoredData[i + yh][j];
+			RestoredData[i + yh][j] = temp;
+		}
+	}
+	
 }

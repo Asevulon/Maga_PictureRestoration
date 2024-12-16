@@ -52,11 +52,11 @@ END_MESSAGE_MAP()
 
 MyDlg::MyDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MAGA_PICTURERESTORATION_DIALOG, pParent)
-	, A(1)
-	, x0(0)
-	, y0(0)
-	, Sx(1)
-	, Sy(1)
+	, N(7)
+	, S(1)
+	, ErrBefore(0)
+	, ErrorAfter(0)
+	, ErrorAfterSwap(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -67,11 +67,11 @@ void MyDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SOURCE_PICTURE, SourcePicture);
 	DDX_Control(pDX, IDC_CORRUPTED_PICTURE, CorruptedPicture);
 	DDX_Control(pDX, IDC_RESTORED_PICTURE, RestoredPicture);
-	DDX_Text(pDX, IDC_EDIT1, A);
-	DDX_Text(pDX, IDC_EDIT2, x0);
-	DDX_Text(pDX, IDC_EDIT3, y0);
-	DDX_Text(pDX, IDC_EDIT4, Sx);
-	DDX_Text(pDX, IDC_EDIT5, Sy);
+	DDX_Text(pDX, IDC_EDIT1, N);
+	DDX_Text(pDX, IDC_EDIT4, S);
+	DDX_Text(pDX, IDC_EDIT5, ErrBefore);
+	DDX_Text(pDX, IDC_EDIT6, ErrorAfter);
+	DDX_Text(pDX, IDC_EDIT7, ErrorAfterSwap);
 }
 
 BEGIN_MESSAGE_MAP(MyDlg, CDialogEx)
@@ -80,6 +80,7 @@ BEGIN_MESSAGE_MAP(MyDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &MyDlg::OnBnClickedOk)
 	ON_BN_CLICKED(IDC_BUTTON_SOURCE, &MyDlg::OnBnClickedButtonSource)
+	ON_BN_CLICKED(IDC_BUTTON_SWAP_QUADRANTS, &MyDlg::OnBnClickedButtonSwapQuadrants)
 END_MESSAGE_MAP()
 
 
@@ -121,11 +122,11 @@ BOOL MyDlg::OnInitDialog()
 
 	CorruptedPicture.ShowPicture(false);
 	CorruptedPicture.SetTitle(L"Размытое изображение");
-	CorruptedPicture.SetPadding(12, 5, 5, 8);
+	CorruptedPicture.SetPadding(0, 0, 0, 0);
 
 	RestoredPicture.ShowPicture(false);
 	RestoredPicture.SetTitle(L"H");
-	RestoredPicture.SetPadding(12, 5, 5, 8);
+	RestoredPicture.SetPadding(0, 0, 0, 0);
 	RestoredPicture.SetLogarithmic(true);
 	return TRUE;  // возврат значения TRUE, если фокус не передан элементу управления
 }
@@ -186,10 +187,12 @@ void MyDlg::OnBnClickedOk()
 	// TODO: добавьте свой код обработчика уведомлений
 	if (!init)return;
 	UpdateData();
-	MainJob mj;
+	mj = MainJob();
 	mj.SetPath(targetpath, IsPicture);
-	mj.SetGauss(A, x0, y0, Sx, Sy);
+	mj.SetGauss(N,S);
 	mj.main();
+
+
 
 	SourcePicture.SetData(mj.GetStretchedData());
 	SourcePicture.Invalidate();
@@ -200,6 +203,9 @@ void MyDlg::OnBnClickedOk()
 	RestoredPicture.SetData(mj.GetRestoredData());
 	RestoredPicture.Invalidate();
 
+	ErrBefore = mj.GetMistake();
+	ErrorAfter = mj.GetDifferance();
+	ErrorAfterSwap = mj.GetDifferanceSwap();
 	UpdateData(FALSE);
 }
 
@@ -233,4 +239,13 @@ void MyDlg::OnBnClickedButtonSource()
 	}
 	SourcePicture.Invalidate();
 	init = true;
+}
+
+
+void MyDlg::OnBnClickedButtonSwapQuadrants()
+{
+	// TODO: добавьте свой код обработчика уведомлений
+	mj.SwapQuadrants();
+	RestoredPicture.SetData(mj.GetRestoredData());
+	RestoredPicture.Invalidate();
 }

@@ -31,7 +31,7 @@ double Restorer::Differance(vector<vector<cmplx>>& left, vector<vector<cmplx>>& 
 			res += (left[i][j].re - right[i][j].re) * (left[i][j].re - right[i][j].re);
 		}
 	}
-	return res / data.size() / (float)data[0].size();
+	return sqrt(res);
 }
 
 void Restorer::CorrectReal(vector<vector<cmplx>>& target)
@@ -104,7 +104,7 @@ void Restorer::Restore()
 
 	CorrectReal(fdata);
 	int count = 0;
-	int cap = 30;
+	int cap = 1000;
 	do
 	{
 		prev = fdata;
@@ -119,7 +119,7 @@ void Restorer::Restore()
 
 		CorrectReal(fdata);
 		count++;
-		} while (count < cap);
+	} while (count < cap);
 	//} while (Differance(fdata, prev) < 1e-2);
 
 	Transform(fdata, restored);
