@@ -7,7 +7,18 @@ void Restorer::Div(vector<vector<cmplx>>& target, vector<vector<cmplx>>& div, ve
 	{
 		for (int j = 0; j < target[i].size(); j++)
 		{
-			if (div[i][j].Abs() < 1e-40)
+			/*if (div[i][j].Abs() < 1e-20)
+			{
+				target[i][j] = cmplx(0, 0);
+			}
+			else
+			{
+				target[i][j] = target[i][j] / div[i][j];
+				id.push_back(point(i, j));
+				val.push_back(target[i][j]);
+			}*/
+			cmplx t = target[i][j] / div[i][j];
+			if ((isnan(t.re)) || (isnan(t.im)))
 			{
 				target[i][j] = cmplx(0, 0);
 			}
@@ -40,8 +51,9 @@ void Restorer::CorrectReal(vector<vector<cmplx>>& target)
 	{
 		for (int j = 0; j < target[i].size(); j++)
 		{
-			//target[i][j].im = 0;
+			target[i][j].im = 0;
 			if (target[i][j].re < 0)target[i][j].re = 0;
+			else if (target[i][j].re > 255) target[i][j].re = 255;
 		}
 	}
 }
@@ -104,7 +116,7 @@ void Restorer::Restore()
 
 	CorrectReal(fdata);
 	int count = 0;
-	int cap = 1000;
+	int cap = 2;
 	do
 	{
 		prev = fdata;
@@ -119,10 +131,19 @@ void Restorer::Restore()
 
 		CorrectReal(fdata);
 		count++;
-	} while (count < cap);
-	//} while (Differance(fdata, prev) < 1e-2);
+	//} while (count < cap);
+	} while (Differance(fdata, prev) > 1e-2);
 
 	Transform(fdata, restored);
+
+	for (int i = 0; i < restored.size(); i++)
+	{
+		for (int j = 0; j < restored[i].size(); j++)
+		{
+			if (restored[i][j] > 255)restored[i][j] = 0;
+			else if (restored[i][j] < 0)restored[i][j] = 0;
+		}
+	}
 }
 
 void Restorer::Test()

@@ -93,42 +93,35 @@ void MainJob::RestoreRange()
 
 void MainJob::Estimate()
 {
-	double Epure = CalcEnergy(StretchedData);
-	
-	double Emist = 0;
-	double Enoise = 0;
-	for (int i = 0; i < StretchedData.size(); i++)
+	EstimateSource = Estimate(StretchedData);
+	EstimateBlured = Estimate(BluredData);
+	EstimatePurified = Estimate(RestoredData);
+	SwapQuadrants();
+	EstimatePurifiedSwap = Estimate(RestoredData);
+	SwapQuadrants();
+}
+
+double MainJob::Estimate(vector<vector<double>>& target)
+{
+	double res = 0;
+	if (target.empty())return res;
+	double max = 0;
+	double temp = 0;
+	for (int i = 1 + Cutter; i < target.size() - 1 - Cutter; i++)
 	{
-		for (int j = 0; j < StretchedData[i].size(); j++)
+		for (int j =  1; j < target[i].size() - 1; j++)
 		{
-			Emist = pow2(StretchedData[i][j] - RestoredData[i][j]);
-			Enoise = pow2(StretchedData[i][j] - BluredData[i][j]);
+			max = (max < target[i][j]) ? target[i][j] : max;
+			temp = fabs(target[i][j] - target[i - 1][j]);
+			temp += fabs(target[i][j] - target[i][j - 1]);
+			res += temp * temp;
 		}
 	}
+	res /= target.size() - 1;
+	res /= target[0].size() - 1;
+	res /= max / 2.;
 
-	Emist /= Epure;
-	Enoise /= Epure;
-
-
-	EstimateSourceBlur = sqrt(Enoise);
-	EstimateSourcePurified = sqrt(Emist);
-
-	SwapQuadrants();
-
-	Emist = 0;
-	for (int i = 0; i < StretchedData.size(); i++)
-	{
-		for (int j = 0; j < StretchedData[i].size(); j++)
-		{
-			Emist = pow2(StretchedData[i][j] - RestoredData[i][j]);
-		}
-	}
-
-	Emist /= Epure;
-
-	EstimateSourcePurifiedSwap = sqrt(Emist);
-
-	SwapQuadrants();
+	return res;
 }
 
 void MainJob::BlurData()
@@ -148,6 +141,21 @@ void MainJob::RestoreData()
 	rest.SetH(H);
 	rest.Restore();
 	RestoredData = rest.GetRestored();
+}
+
+vector<vector<double>> MainJob::CutImage(vector<vector<double>>& source)
+{
+	if (Cutter == 0)return source;
+	vector<vector<double>>res(source.size() - Cutter * 2);
+	for (int i = 0; i < res.size(); i++)
+	{
+		res[i].resize(source[i].size() - Cutter * 2);
+		for (int j = 0; j < res[i].size(); j++)
+		{
+			res[i][j] = source[i + Cutter][j + Cutter];
+		}
+	}
+	return res;
 }
 
 void MainJob::SetPath(CString& path, bool ispicture)
@@ -191,17 +199,17 @@ std::vector<std::vector<double>> MainJob::GetPureData()
 
 std::vector<std::vector<double>> MainJob::GetStretchedData()
 {
-	return StretchedData;
+	return CutImage(StretchedData);
 }
 
 std::vector<std::vector<double>> MainJob::GetRestoredData()
 {
-	return RestoredData;
+	return CutImage(RestoredData);
 }
 
 std::vector<std::vector<double>> MainJob::GetBluredData()
 {
-	return BluredData;
+	return CutImage(BluredData);
 }
 
 std::vector<std::vector<double>> MainJob::GetH()
@@ -215,20 +223,29 @@ void MainJob::SetGauss(int n, double s)
 	S = s;
 }
 
-
-double MainJob::GetMistake()
+void MainJob::SetCutter(int val)
 {
-	return EstimateSourceBlur;
+	Cutter = val;
 }
 
-double MainJob::GetDifferance()
+double MainJob::GetEstSource()
 {
-	return EstimateSourcePurified;
+	return EstimateSource;
 }
 
-double MainJob::GetDifferanceSwap()
+double MainJob::GetEstBlured()
 {
-	return EstimateSourcePurifiedSwap;
+	return EstimateBlured;
+}
+
+double MainJob::GetEstPurified()
+{
+	return EstimatePurified;
+}
+
+double MainJob::GetEstPurifiedSwap()
+{
+	return EstimatePurifiedSwap;
 }
 
 void MainJob::SwapQuadrants()

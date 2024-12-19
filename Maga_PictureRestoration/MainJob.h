@@ -19,12 +19,14 @@ private:
 	std::vector<std::vector<double>> RestoredData;
 	std::vector<std::vector<double>> H;
 	std::pair<int, int> OriginalSourceSize;
-	double EstimateSourceBlur = 0;
-	double EstimateSourcePurified = 0;
-	double EstimateSourcePurifiedSwap = 0;
+	double EstimateSource = 0;
+	double EstimateBlured = 0;
+	double EstimatePurified = 0;
+	double EstimatePurifiedSwap = 0;
 
 	int N = 0;
 	double S = 0;
+	int Cutter = 0;
 protected:
 	void LoadPicture();
 	void LoadGauss();
@@ -35,9 +37,10 @@ protected:
 	std::vector<std::vector<double>>GetAbs(std::vector<std::vector<cmplx>>& source);
 	void RestoreRange();
 	void Estimate();
-
+	double Estimate(vector<vector<double>>& target);
 	void BlurData();
 	void RestoreData();
+	vector<vector<double>> CutImage(vector<vector<double>>& source);
 public:
 	void SetPath(CString& path, bool ispicture);
 	void main();
@@ -48,9 +51,11 @@ public:
 	std::vector<std::vector<double>> GetBluredData();
 	std::vector<std::vector<double>> GetH();
 	void SetGauss(int n, double s);
-	double GetMistake();
-	double GetDifferance();
-	double GetDifferanceSwap();
+	void SetCutter(int val);
+	double GetEstSource();
+	double GetEstBlured();
+	double GetEstPurified();
+	double GetEstPurifiedSwap();
 	void SwapQuadrants();
 };
 

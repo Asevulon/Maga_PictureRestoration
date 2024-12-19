@@ -57,6 +57,8 @@ MyDlg::MyDlg(CWnd* pParent /*=nullptr*/)
 	, ErrBefore(0)
 	, ErrorAfter(0)
 	, ErrorAfterSwap(0)
+	, ErrorBlured(0)
+	, Cutter(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -72,6 +74,12 @@ void MyDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT5, ErrBefore);
 	DDX_Text(pDX, IDC_EDIT6, ErrorAfter);
 	DDX_Text(pDX, IDC_EDIT7, ErrorAfterSwap);
+	DDX_Text(pDX, IDC_EDIT8, ErrorBlured);
+	DDX_Control(pDX, IDC_EDIT5, EBctrl);
+	DDX_Control(pDX, IDC_EDIT8, EBLctrl);
+	DDX_Control(pDX, IDC_EDIT6, ERctrl);
+	DDX_Control(pDX, IDC_EDIT7, ERWctrl);
+	DDX_Text(pDX, IDC_EDIT9, Cutter);
 }
 
 BEGIN_MESSAGE_MAP(MyDlg, CDialogEx)
@@ -127,7 +135,7 @@ BOOL MyDlg::OnInitDialog()
 	RestoredPicture.ShowPicture(false);
 	RestoredPicture.SetTitle(L"H");
 	RestoredPicture.SetPadding(0, 0, 0, 0);
-	RestoredPicture.SetLogarithmic(true);
+	RestoredPicture.SetLogarithmic(false);
 	return TRUE;  // возврат значения TRUE, если фокус не передан элементу управления
 }
 
@@ -190,6 +198,7 @@ void MyDlg::OnBnClickedOk()
 	mj = MainJob();
 	mj.SetPath(targetpath, IsPicture);
 	mj.SetGauss(N,S);
+	mj.SetCutter(Cutter);
 	mj.main();
 
 
@@ -203,10 +212,24 @@ void MyDlg::OnBnClickedOk()
 	RestoredPicture.SetData(mj.GetRestoredData());
 	RestoredPicture.Invalidate();
 
-	ErrBefore = mj.GetMistake();
-	ErrorAfter = mj.GetDifferance();
-	ErrorAfterSwap = mj.GetDifferanceSwap();
-	UpdateData(FALSE);
+	/*ErrBefore = mj.GetEstSource();
+	ErrorAfter = mj.GetEstPurified();
+	ErrorAfterSwap = mj.GetEstPurifiedSwap();
+	ErrorBlured = mj.GetEstBlured();
+	UpdateData(FALSE);*/
+	CString str;
+
+	str.Format(L"%.3f", mj.GetEstSource());
+	EBctrl.SetWindowTextW(str);
+
+	str.Format(L"%.3f", mj.GetEstBlured());
+	EBLctrl.SetWindowTextW(str);
+
+	str.Format(L"%.3f", mj.GetEstPurified());
+	ERctrl.SetWindowTextW(str);
+
+	str.Format(L"%.3f", mj.GetEstPurifiedSwap());
+	ERWctrl.SetWindowTextW(str);
 }
 
 

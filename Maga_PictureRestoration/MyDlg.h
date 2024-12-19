@@ -47,4 +47,10 @@ public:
 	double ErrBefore;
 	double ErrorAfter;
 	double ErrorAfterSwap;
+	double ErrorBlured;
+	CEdit EBctrl;
+	CEdit EBLctrl;
+	CEdit ERctrl;
+	CEdit ERWctrl;
+	int Cutter;
 };

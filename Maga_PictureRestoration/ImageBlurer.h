@@ -8,6 +8,7 @@ private:
 	std::vector<std::vector<double>> data;
 	std::vector<std::vector<double>> Convolution;
 	vector<double> H;
+	vector<vector<double>> H2D;
 
 	double S = 0;
 	int N = 0;
@@ -15,6 +16,8 @@ private:
 protected:
 	void GenerateH(std::vector<double>& target);
 	void Convolute(std::vector<std::vector<double>>& target, std::vector<std::vector<double>>& source, std::vector<double>& H);
+	void GenerateH(vector<vector<double>>& target);
+	void Convolute(std::vector<std::vector<double>>& target, std::vector<std::vector<double>>& source, std::vector<std::vector<double>>& H);
 public:
 	void SetData(std::vector<std::vector<double>>& source);
 	std::vector<std::vector<double>>GetData();
